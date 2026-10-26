@@ -30,7 +30,7 @@ export function mapProductResponse(raw: Record<string, unknown>): Product {
         productTotalStock: raw.productTotalStock as number || 0,
         productExtra: (raw.productExtra as Record<string, unknown>[] || []).map(item => ({
             color: item.Color as string || '',
-            size: item.Color as string || '',
+            size: item.Size as string || '',    // fixed
             stock: item.Stock as number || 0,
         })),
         createdAt: raw.createdAt as string || '',

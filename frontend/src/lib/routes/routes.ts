@@ -1,5 +1,78 @@
+import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 
+export const routes: RouteRecordRaw[] = [
+  {
+    path: '/',
+    name: 'home',
+    component: () => import('@/LandingPage.vue'),
+  },
+  {
+    path: '/products',
+    name: 'product-search',
+    component: () => import('@/components/placeholder_page.vue'),
+    props: { title: 'Search' },
+  },
+  {
+    path: '/products/:id',
+    name: 'product-detail',
+    component: () => import('@/components/placeholder_page.vue'),
+    props: { title: 'Product' },
+  },
+  {
+    path: '/cart',
+    name: 'cart',
+    component: () => import('@/components/placeholder_page.vue'),
+    props: { title: 'Cart' },
+  },
+  {
+    path: '/orders',
+    name: 'order',
+    component: () => import('@/components/placeholder_page.vue'),
+    props: { title: 'Orders' },
+  },
+  {
+    path: '/signin',
+    name: 'signin',
+    component: () => import('@/views/SignInView.vue'),
+    props: { title: 'Login' },
+  },
+  {
+    path: '/register',
+    name: 'register',
+    component: () => import('@/views/RegisterView.vue'),
+    props: { title: 'Register' },
+  },
+  {
+    path: '/auth',
+    redirect: '/signin'
+  },
+  {
+    path: '/employee',
+    name: 'employee',
+    component: () => import('@/components/placeholder_page.vue'),
+    props: { title: 'Employee' },
+  },
+  {
+    path: '/admin',
+    name: 'admin',
+    component: () => import('@/components/placeholder_page.vue'),
+    props: { title: 'Admin' },
+  },
+  {
+    path: '/health',
+    name: 'health',
+    component: () => import('@/components/placeholder_page.vue'),
+    props: { title: 'Health' },
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'not-found',
+    component: () => import('@/components/placeholder_page.vue'),
+    props: { title: '404 — Page Not Found' },
+  },
+]
 
-export function mapRoutes() {
-
-}
+export const router = createRouter({
+  history: createWebHistory(),
+  routes,
+})

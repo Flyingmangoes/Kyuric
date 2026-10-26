@@ -886,6 +886,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@vue/devtools-api@npm:^6.6.4":
+  version: 6.6.4
+  resolution: "@vue/devtools-api@npm:6.6.4"
+  checksum: 10c0/0a993ae23618166e1bee5a7c14cebd8312752b93c143cbdd48fb2d0f7ade070d0e6baf757cd920d4681fef8f9acf29515162160f38cc7410f9a684d2df21b6de
+  languageName: node
+  linkType: hard
+
 "@vue/devtools-core@npm:^8.2.1":
   version: 8.2.1
   resolution: "@vue/devtools-core@npm:8.2.1"
@@ -1013,6 +1020,21 @@ __metadata:
   version: 3.2.1
   resolution: "alien-signals@npm:3.2.1"
   checksum: 10c0/4c4064faa208126177224d1ed6a2310687d452dec0771994e276d9af4c72e853fcb969ae4a7fcd034b1d1b9accb9500f4941178326eeea1cb8f64ec612853ef8
+  languageName: node
+  linkType: hard
+
+"animejs@npm:^4.5.0":
+  version: 4.5.0
+  resolution: "animejs@npm:4.5.0"
+  peerDependencies:
+    "@types/three": ">=0.150.0"
+    three: ">=0.150.0"
+  peerDependenciesMeta:
+    "@types/three":
+      optional: true
+    three:
+      optional: true
+  checksum: 10c0/2e8c282bb5a7f6c7303ff113822e742d38c426e93046527598b3372630600a295dca47537db513eb32daba4d81a6b77996935826cea10d1e6b441da78598431e
   languageName: node
   linkType: hard
 
@@ -1239,6 +1261,8 @@ __metadata:
     "@types/node": "npm:^24.13.3"
     "@vitejs/plugin-vue": "npm:^6.0.8"
     "@vue/tsconfig": "npm:^0.9.1"
+    animejs: "npm:^4.5.0"
+    gsap: "npm:^3.15.0"
     lucide-vue-next: "npm:^1.0.0"
     npm-run-all2: "npm:^9.0.2"
     postcss: "npm:^8.5.28"
@@ -1247,6 +1271,7 @@ __metadata:
     vite: "npm:^8.1.5"
     vite-plugin-vue-devtools: "npm:^8.1.5"
     vue: "npm:^3.5.40"
+    vue-router: "npm:4"
     vue-tsc: "npm:^3.3.7"
   languageName: unknown
   linkType: soft
@@ -1281,6 +1306,13 @@ __metadata:
   version: 4.2.11
   resolution: "graceful-fs@npm:4.2.11"
   checksum: 10c0/386d011a553e02bc594ac2ca0bd6d9e4c22d7fa8cfbfc448a6d148c59ea881b092db9dbe3547ae4b88e55f1b01f7c4a2ecc53b310c042793e63aa44cf6c257f2
+  languageName: node
+  linkType: hard
+
+"gsap@npm:^3.15.0":
+  version: 3.15.0
+  resolution: "gsap@npm:3.15.0"
+  checksum: 10c0/5d86de72cb0bd6b20502c34c329a83a7d679979731bb465164407b7a5225aa61d612beee740eea36258622897c116cd2ca35320d530b7cf68bad62522361fcf7
   languageName: node
   linkType: hard
 
@@ -2279,6 +2311,17 @@ __metadata:
   version: 3.2.0
   resolution: "vscode-uri@npm:3.2.0"
   checksum: 10c0/65b4d78f2d014ee359ba36a81605bbd8a420d4c13d3fdba61b44b301ea416bf4b12637253ee72c0f30c1cd774c3649d667674c2fbf00c931667b869158f8519f
+  languageName: node
+  linkType: hard
+
+"vue-router@npm:4":
+  version: 4.6.4
+  resolution: "vue-router@npm:4.6.4"
+  dependencies:
+    "@vue/devtools-api": "npm:^6.6.4"
+  peerDependencies:
+    vue: ^3.5.0
+  checksum: 10c0/9dcbe1124f1f444ae263ca37914829eea1ebff3feaa182559efee611dfd4436bbebe0ebffdcb60e37fecfb2fbdc691346df00996eeba708485e9ea9b8a7dd193
   languageName: node
   linkType: hard
 
