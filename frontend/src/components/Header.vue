@@ -79,54 +79,78 @@
             ⌘K
           </span>
         </div>
-        <!-- Account Link -->
-        <a
-          href="/account"
-          class="p-2 text-black hover:text-[#E05322] transition-colors"
-          title="Client Account"
+       <!-- Guest -->
+        <div
+          v-if="!isLoggedIn"
+          class="hidden sm:flex items-center space-x-3 text-xs font-mono font-bold tracking-wider"
         >
-          <svg
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+          <RouterLink
+            to="/signin"
+            class="text-neutral-800 hover:text-[#E05322] uppercase transition-colors px-2 py-1"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="1.8"
-              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-            />
-          </svg>
-        </a>
-        <!-- Cart Trigger Pill -->
-        <a
-          href="/cart"
-          class="flex items-center space-x-2 bg-black text-[#FAF9F5] px-3.5 py-2 hover:bg-[#E05322] transition-colors group select-none"
-        >
-          <svg
-            class="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+            SIGN IN
+          </RouterLink>
+          <RouterLink
+            to="/register"
+            class="bg-black hover:bg-[#E05322] text-white px-3.5 py-1.5 uppercase transition-colors"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-            />
-          </svg>
-          <span class="text-xs font-mono font-bold tracking-tight">
-            ${{ cartTotal.toFixed(2) }}
-          </span>
-          <span class="text-neutral-500 font-mono text-xs">/</span>
-          <span
-            class="text-[11px] font-mono bg-[#222222] group-hover:bg-black/30 px-1.5 py-0.5 rounded text-white font-bold"
+            JOIN
+          </RouterLink>
+        </div>
+
+        <!-- Registered user -->
+        <div v-else ref="menuRef" class="relative hidden sm:block">
+          <button
+            type="button"
+            class="flex items-center space-x-2 hover:text-[#E05322] transition-colors"
+            :aria-expanded="isUserMenuOpen"
+            aria-haspopup="menu"
+            @click="isUserMenuOpen = !isUserMenuOpen"
           >
-            {{ cartItemCount.toString().padStart(2, "0") }}
-          </span>
-        </a>
+            <span
+              class="w-8 h-8 rounded-full bg-black text-[#FAF9F5] flex items-center justify-center text-[11px] font-mono font-bold"
+            >
+              {{ initials }}
+            </span>
+            <span class="text-xs font-mono font-bold uppercase tracking-wider hidden md:inline">
+              {{ user?.name.split(' ')[0] }}
+            </span>
+          </button>
+
+          <div
+            v-if="isUserMenuOpen"
+            role="menu"
+            class="absolute right-0 mt-2 w-52 bg-[#FAF9F5] border border-[#E5E4DE] shadow-lg text-xs font-mono font-bold uppercase tracking-wider"
+          >
+            <div class="px-4 py-3 border-b border-[#E5E4DE] text-[10px] text-neutral-500 truncate normal-case">
+              {{ user?.email }}
+            </div>
+            <RouterLink
+              to="/account"
+              role="menuitem"
+              class="block px-4 py-3 hover:bg-[#F3F2EC] hover:text-[#E05322]"
+              @click="isUserMenuOpen = false"
+            >
+              PROFILE
+            </RouterLink>
+            <RouterLink
+              to="/orders"
+              role="menuitem"
+              class="block px-4 py-3 hover:bg-[#F3F2EC] hover:text-[#E05322]"
+              @click="isUserMenuOpen = false"
+            >
+              ORDERS
+            </RouterLink>
+            <button
+              type="button"
+              role="menuitem"
+              class="w-full text-left px-4 py-3 border-t border-[#E5E4DE] hover:bg-[#F3F2EC] hover:text-[#E05322]"
+              @click="handleLogout"
+            >
+              SIGN OUT
+            </button>
+          </div>
+        </div>
         <!-- Mobile Menu Toggle Button -->
         <button
           class="xl:hidden p-2 text-black hover:text-[#E05322]"
@@ -193,17 +217,35 @@
             >
           </a>
         </nav>
+        <div class="sm:hidden grid grid-cols-2 gap-3 pt-2">
+          <a
+            href="/signin"
+            class="text-center py-2.5 text-xs font-mono font-bold uppercase border border-neutral-300 text-black hover:border-black transition-colors"
+          >
+            SIGN IN
+          </a>
+          <a
+            href="/register"
+            class="text-center py-2.5 text-xs font-mono font-bold uppercase bg-black text-white hover:bg-[#E05322] transition-colors"
+          >
+            JOIN
+          </a>
+        </div>
       </div>
     </transition>
   </header>
 </template>
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuth } from '@/app/auth_service/hook/useAuth'
+
+const router = useRouter()
+const { user, isLoggedIn, initials, logout } = useAuth()
 
 const isMobileMenuOpen = ref(false)
 const searchQuery = ref('')
-const cartTotal = ref(325.0)
-const cartItemCount = ref(3)
+const cartItemCount = ref(0)
 const navLinks = [
   { label: 'Shop All', href: '/catalog', badge: '[381]' },
   { label: 'New Arrivals', href: '/catalog?filter=new', badge: null },
@@ -217,4 +259,20 @@ const navLinks = [
     active: true,
   },
 ]
+
+const handleLogout = () => {
+  logout()
+  isUserMenuOpen.value = false
+  isMobileMenuOpen.value = false
+  router.push('/')
+}
+
+const onDocClick = (e) => {
+  if (menuRef.value && !menuRef.value.contains(e.target)) {
+    isUserMenuOpen.value = false
+  }
+}
+
+onMounted(() => document.addEventListener('click', onDocClick))
+onBeforeUnmount(() => document.removeEventListener('click', onDocClick))
 </script>

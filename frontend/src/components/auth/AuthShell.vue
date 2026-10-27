@@ -13,7 +13,7 @@ const copy = computed(() =>
         alt: 'Or sign in with',
       }
     : {
-        label: 'New Collector Profile',
+        label: 'New Profiles',
         title: 'Create Your Account',
         desc: 'Create an authenticated identity to access your orders, saved items, and exclusive drops.',
         alt: 'Or sign up with',
