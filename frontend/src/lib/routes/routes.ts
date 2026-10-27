@@ -19,6 +19,12 @@ export const routes: RouteRecordRaw[] = [
     props: { title: 'Product' },
   },
   {
+    path: '/catalog',
+    name: 'product-catalog',
+    component: () => import('@/app/products_service/pages/CatalogPage.vue'),
+    props: { title: 'Catalog'}
+  },
+  {
     path: '/cart',
     name: 'cart',
     component: () => import('@/components/placeholder_page.vue'),

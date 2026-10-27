@@ -38,7 +38,7 @@
           <span
             class="text-[9px] font-mono tracking-widest text-neutral-500 hidden lg:inline-block border-l border-neutral-300 pl-2 leading-none"
           >
-            EST. 2024<br />ARCHIVAL SPEC
+            EST. 2026<br />ARCHIVAL SPEC  
           </span>
         </a>
         <!-- Desktop Navigation Taxonomy -->

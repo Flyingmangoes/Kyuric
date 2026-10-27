@@ -181,9 +181,6 @@
           <span class="hover:text-black transition-colors cursor-default"
             >WEBFLOW</span
           >
-          <span class="hover:text-black transition-colors cursor-default"
-            >SPOTIFY</span
-          >
           <span
             class="text-[#E05322] font-black hover:opacity-80 transition-opacity cursor-default"
             >HYPEBEAST</span
