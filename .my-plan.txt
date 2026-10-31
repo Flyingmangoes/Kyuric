@@ -1,0 +1,36 @@
+Step-by-Step Hosting Guide
+1. Frontend: Vue + Tailwind on Vercel or Cloudflare Pages
+Build command: npm run build
+
+Output directory: dist
+
+Setup: Push your Vue repository to GitHub, import the project into Vercel or Cloudflare Pages, and it will automatically handle builds and SSL certificates on every push.
+
+2. Backend: Go + Gin on Render
+Setup: Connect your GitHub backend repository as a Web Service on Render.
+
+Important Go Gotchas for Deployment:
+
+Ensure your Go code reads the port from the environment variable and binds to 0.0.0.0:
+
+Go
+port := os.Getenv("PORT")
+if port == "" {
+    port = "8080"
+}
+r.Run(":" + port) // Listen on 0.0.0.0:port
+Note on Render's Free Tier: Free web services spin down after 15 minutes of inactivity. When a new request comes in, it takes about 30–50 seconds to cold-start.
+
+Alternative for Backend: If you prefer not to deal with cold starts and have access to a small always-on cloud instance, Oracle Cloud Infrastructure (OCI) Always Free tier offers ARM Ampere VMs (up to 24GB RAM) which can run your entire backend, Postgres, and Redis locally inside Docker. However, setting up OCI's networking security lists has a steeper learning curve than PaaS options like Render.
+
+3. Database: PostgreSQL on Supabase or Neon
+Create a free project on Supabase or Neon.
+
+Copy the connection string (DATABASE_URL) and inject it into your Render backend environment variables.
+
+GORM will handle your migrations seamlessly out-of-the-box against these managed Postgres instances.
+
+4. Cache: Redis / Valkey on Redis Cloud
+Sign up for Redis Cloud, which offers a free tier (typically 30MB, enough for caching, sessions, or cart tokens).
+
+Grab the endpoint and password, then pass them to your Go backend via environment variables so Gorm/Gin can hook into it.
