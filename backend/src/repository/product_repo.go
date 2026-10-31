@@ -1,0 +1,241 @@
+package repository
+
+import (
+	"backend/src/models"
+	repo_type "backend/src/repository/types"
+
+	"context"
+	"database/sql"
+	"fmt"
+)
+
+type ProductStoreInterface interface {
+	Create(ctx context.Context, params *repo_type.ProductProfileParams) (*models.Product, error)
+	Update(ctx context.Context, params *repo_type.ProductProfileParams) (*models.Product, error)
+	Remove(ctx context.Context, params *repo_type.ProductProfileParams) error
+
+	Get(ctx context.Context, product_id string) (*models.Product, error)
+	GetForUpdate(ctx context.Context, tx *sql.Tx, orderInput []repo_type.OrderItemInput) ([]models.Product, error)
+	Search(ctx context.Context, params *repo_type.ProductSearchParams) ([]models.Product, error)
+
+	UpdateRating(ctx context.Context, params *repo_type.ProductProfileParams) (*models.Product, error)
+    DeductStock(ctx context.Context, tx *sql.Tx, items []repo_type.OrderItemInput) error
+}
+
+type ProductStore struct {
+	db *sql.DB
+}
+
+func NewProductStore(db *sql.DB) *ProductStore{
+	return &ProductStore{db: db}
+}
+
+
+
+func (ps *ProductStore) Create(ctx context.Context, params *repo_type.ProductProfileParams) (*models.Product, error) {
+	product := &models.Product{}
+	tx, err := ps.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	
+	defer tx.Rollback()
+
+	err = tx.QueryRowContext(ctx,
+		`INSERT INTO mkt_products (product_name, product_desc, product_pic, price, category, availability)
+		VALUES ($1, $2, $3, $4, $5, $6)
+		RETURNING product_id, product_name, product_desc, 
+		product_pic, price, category, rating, availability, created_at`,
+		params.Name, params.Desc, 
+		params.ImageUrl, params.Price, params.Category,
+		params.Availability,
+	).Scan(&product.ProductID, 
+		&product.Name, &product.Desc, 
+		&product.ProductIMG, &product.Price, 
+		&product.Category, &product.Rating, 
+		&product.Availability, &product.CreatedAt,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+	
+	if err = tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	return product, nil
+}
+
+
+
+func (ps *ProductStore) Update(ctx context.Context, params *repo_type.ProductProfileParams) (*models.Product, error) {
+	product := &models.Product{}
+
+	tx, _ := ps.db.BeginTx(ctx, nil)
+
+	defer tx.Rollback()
+
+	err := tx.QueryRowContext(ctx,
+		`UPDATE mkt_ecommerce.mkt_products SET 
+			product_name	= COALESCE ($1, product_name),
+			product_desc	= COALESCE ($2, product_desc),
+			product_pic		= COALESCE ($3, product_pic),
+			price			= COALESCE ($4, price),
+			category		= COALESCE ($5, category),
+			availability	= COALESCE ($6, availability),
+			updated_at		= NOW()
+		WHERE product_id = $7
+		RETURNING product_id, product_name, product_desc, product_pic, price, category, availability, updated_at`,
+		params.Name, 	 params.Desc, 
+	 	params.ImageUrl, params.Price, 
+		params.Category, params.Availability, 
+		params.ProductID,
+	).Scan(
+		&params.ProductID, 	&product.Name, 
+		&product.Desc, 		&product.ProductIMG, 
+		&product.Price, 	&product.Category, 
+		&product.Availability, &product.UpdatedAt,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	return product, nil
+}
+
+
+
+func (ps *ProductStore)Remove(ctx context.Context, params *repo_type.ProductProfileParams) error {
+	results, err := ps.db.ExecContext(ctx,
+		`DELETE FROM mkt_ecommerce.mkt_products
+		WHERE product_id = $1`,
+		params.ProductID,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	rows, err := results.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return fmt.Errorf("product not found or product id not matched")
+	}
+
+	return nil
+}
+
+
+
+func (ps *ProductStore)GetForUpdate(ctx context.Context, tx *sql.Tx, orderInput []repo_type.OrderItemInput) ([]models.Product, error) {
+	products := []models.Product{}
+
+	for _, p := range orderInput {
+		product := &models.Product{}
+
+		err := tx.QueryRowContext(ctx,
+			`SELECT product_id, product_name, product_desc, 
+				product_pic, price, rating, 
+				availability, created_at, updated_at 
+			FROM mkt_ecommerce.mkt_products
+			WHERE product_id = $1`,
+			p.ProductID,
+		).Scan(
+			&product.ProductID, &product.Name, 
+			&product.Desc, 
+			&product.ProductIMG, &product.Price, 
+			&product.Rating, &product.Availability, 
+			&product.CreatedAt, &product.UpdatedAt,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		products = append(products, *product)
+	}
+
+	return products, nil
+}
+
+func (ps *ProductStore) Get(ctx context.Context, product_id string) (*models.Product, error) {
+	product := &models.Product{}
+	
+	err := ps.db.QueryRowContext(ctx,
+		`SELECT product_id, product_name, product_desc, 
+			product_pic, price, rating, 
+			availability, created_at, updated_at 
+		FROM mkt_ecommerce.mkt_products WHERE product_id = $1`,
+		product_id,
+	).Scan(
+		&product.ProductID, &product.Name,
+		&product.Desc, 
+		&product.ProductIMG, &product.Price,
+		&product.Rating, 	&product.Availability, 
+		&product.CreatedAt,	&product.UpdatedAt,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return product, nil
+}
+
+
+func (ps *ProductStore) UpdateRating(ctx context.Context, params *repo_type.ProductProfileParams) (*models.Product, error) {
+	product := &models.Product{}
+	
+	err := ps.db.QueryRow(
+		`UPDATE mkt_ecommerce.mkt_products SET
+			rating = COALESCE($1, rating)
+		WHERE product_id = $2
+		RETURNING product_id, rating`,
+		params.Rating, params.ProductID,
+	).Scan(&product.ProductID, &product.Rating)	
+
+	if err != nil {
+		return nil, err
+	}
+
+	return product, nil
+}
+
+func (ps *ProductStore) DeductStock(ctx context.Context, tx *sql.Tx, items []repo_type.OrderItemInput) error {
+    for _, item := range items {
+        result, err := tx.ExecContext(ctx,
+            `UPDATE mkt_ecommerce.mkt_products SET 
+				availability = availability - $1
+            WHERE product_id = $2 AND availability >= $1`,
+            item.Quantity, item.ProductID,
+        )
+		
+        if err != nil {
+            return err
+        }
+
+        rows, err := result.RowsAffected()
+        if err != nil {
+            return err
+        }
+
+        if rows == 0 {
+            return fmt.Errorf("insufficient stock for product %s", *item.ProductID)
+        }
+    }
+	
+    return nil
+}
+
+func (ps *ProductStore) Search(ctx context.Context, params *repo_type.ProductSearchParams) ([]models.Product, error) {
+	return nil, nil
+}
