@@ -422,105 +422,13 @@
             </div>
           </div>
           <!-- Dynamic Products Grid -->
-          <div
-            class="grid gap-6"
-            :class="
-              gridCols === 4
-                ? 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-4'
-                : 'grid-cols-1 sm:grid-cols-2'
-            "
-          >
-            <article
-              v-for="item in products"
-              :key="item.id"
-              class="bg-white border border-neutral-300/80 p-3 space-y-3 group hover:border-black transition-all shadow-sm flex flex-col justify-between"
-            >
-              <!-- Image Container & Badges -->
-              <div
-                class="aspect-[3/4] bg-neutral-100 overflow-hidden relative border border-neutral-200"
-              >
-                <!-- Badges -->
-                <span
-                  v-if="item.badge"
-                  class="absolute top-2 left-2 z-10 text-[9px] font-mono font-bold uppercase px-2 py-0.5 tracking-wider"
-                  :class="item.badgeClass || 'bg-black text-white'"
-                >
-                  {{ item.badge }}
-                </span>
-                <!-- Wishlist Toggle -->
-                <button
-                  @click="toggleWishlist(item.id)"
-                  class="absolute top-2 right-2 z-10 w-7 h-7 bg-white/90 hover:bg-white text-black flex items-center justify-center border border-neutral-200 transition-colors shadow-sm"
-                  aria-label="Wishlist"
-                >
-                  <span
-                    :class="
-                      item.wishlist ? 'text-[#E05322]' : 'text-neutral-400'
-                    "
-                  >
-                    {{ item.wishlist ? "♥" : "♡" }}
-                  </span>
-                </button>
-                <!-- Product Photo -->
-                <img
-                  :src="item.image"
-                  :alt="item.name"
-                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                />
-              </div>
-              <!-- Product Details -->
-              <div class="space-y-1.5 pt-1">
-                <!-- Color Variants & Swatch Dots -->
-                <div
-                  class="flex items-center space-x-1.5 text-[9px] font-mono text-neutral-400"
-                >
-                  <div class="flex items-center space-x-1">
-                    <span
-                      v-for="(hex, cIdx) in item.colors"
-                      :key="cIdx"
-                      class="w-2 h-2 rounded-full border border-black/20"
-                      :style="{ backgroundColor: hex }"
-                    ></span>
-                  </div>
-                  <span class="uppercase tracking-tight"
-                    >{{ item.colorCount }} COLORS</span
-                  >
-                </div>
-                <!-- Product Title & Subtitle -->
-                <div>
-                  <h4
-                    class="text-xs font-bold uppercase text-black group-hover:text-[#E05322] transition-colors line-clamp-1"
-                  >
-                    {{ item.name }}
-                  </h4>
-                  <p
-                    class="text-[10px] font-mono text-neutral-500 line-clamp-1"
-                  >
-                    {{ item.spec }}
-                  </p>
-                </div>
-                <!-- Pricing & Drop Tag -->
-                <div
-                  class="flex justify-between items-baseline pt-1 border-t border-neutral-100"
-                >
-                  <div class="flex items-baseline space-x-1.5">
-                    <span class="text-sm font-black font-mono text-black">
-                      ${{ item.price }}
-                    </span>
-                    <span
-                      v-if="item.originalPrice"
-                      class="text-[10px] font-mono text-neutral-400 line-through"
-                    >
-                      ${{ item.originalPrice }}
-                    </span>
-                  </div>
-                  <span class="text-[9px] font-mono uppercase text-neutral-400">
-                    {{ item.dropTag }}
-                  </span>
-                </div>
-              </div>
-            </article>
-          </div>
+          <ProductGrid
+            :products="products"
+            :columns="gridCols"
+            :wishlist-ids="wishlistIds"
+            show-wishlist
+            @toggle-wishlist="toggleWishlist"
+          />
           <!-- 05. Pagination Bar -->
           <div
             class="flex flex-col sm:flex-row justify-between items-center gap-4 pt-8 border-t border-neutral-300 text-xs font-mono"
@@ -641,14 +549,26 @@
     </div>
   </main>
 </template>
-<script setup>
-import { ref } from "vue";
+<script setup lang="ts">
+import { ref } from 'vue'
+import ProductGrid from '@/components/product/ProductGrid.vue'
+import { useProducts } from '@/app/products_service/useProduct'
+
+const { all: products } = useProducts()
+
+const wishlistIds = ref<number[]>([4])
+const toggleWishlist = (id: number) => {
+  wishlistIds.value = wishlistIds.value.includes(id)
+    ? wishlistIds.value.filter((i) => i !== id)
+    : [...wishlistIds.value, id]
+}
+
+const gridCols = ref<2 | 4>(4)
 
 // Search and top category pills
-const searchQuery = ref("HEAVYWEIGHT BOXY HOODIE");
+const searchQuery = ref("");
 const activeCategoryFilter = ref("ALL [48]");
 const sortBy = ref("featured");
-const gridCols = ref(4);
 
 const quickCategories = [
   { label: "ALL [48]" },
@@ -660,10 +580,9 @@ const quickCategories = [
   { label: "ON SALE (-30%)", isSale: true },
 ];
 
-// Applied filters tags
 const activeFilters = ref(["CATEGORY: TOPS", "COLOR: ONYX", "SIZE: L", "UNDER $200"]);
 
-const removeFilter = (index) => {
+const removeFilter = (index: any) => {
   activeFilters.value.splice(index, 1);
 };
 
@@ -696,144 +615,11 @@ const colorPalette = ref([
   { name: "HEATHER", hex: "#94a3b8", selected: false },
 ]);
 
-// 8 Curated Specimens shown on the screen
-const products = ref([
-  {
-    id: 1,
-    name: "HERITAGE HEAVYWEIGHT HOODIE",
-    spec: "480GSM Loopback French...",
-    price: 145,
-    originalPrice: 180,
-    dropTag: "//01 DROP",
-    colorCount: 3,
-    colors: ["#111111", "#f5f4ee", "#738276"],
-    badge: "BESTSELLER",
-    badgeClass: "bg-black text-white",
-    wishlist: false,
-    image:
-      "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=700&q=80",
-  },
-  {
-    id: 2,
-    name: "TACTICAL PARACHUTE CARGO",
-    spec: "Japanese Ripstop Water-...",
-    price: 185,
-    originalPrice: null,
-    dropTag: "//02 DROP",
-    colorCount: 2,
-    colors: ["#111111", "#f5f4ee"],
-    badge: "NEW DROP",
-    badgeClass: "bg-[#C84518] text-white",
-    wishlist: false,
-    image:
-      "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&w=700&q=80",
-  },
-  {
-    id: 3,
-    name: "OVERSIZED RAW EDGE TEE",
-    spec: "Compact 320GSM Vintage...",
-    price: 68,
-    originalPrice: null,
-    dropTag: "//03 DROP",
-    colorCount: 4,
-    colors: ["#111111", "#f5f4ee", "#c84518", "#738276"],
-    badge: "LIMITED",
-    badgeClass: "bg-black text-white",
-    wishlist: false,
-    image:
-      "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=700&q=80",
-  },
-  {
-    id: 4,
-    name: "TEXTURED MOHAIR CARDIGAN",
-    spec: "70% Kid Mohair / 30% Virgi...",
-    price: 220,
-    originalPrice: null,
-    dropTag: "//FEATURED",
-    colorCount: 2,
-    colors: ["#c84518", "#111111"],
-    badge: null,
-    badgeClass: "",
-    wishlist: true,
-    image:
-      "https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=700&q=80",
-  },
-  {
-    id: 5,
-    name: "MODULAR UTILITY VEST",
-    spec: "Multi-Pocket Cordura &...",
-    price: 160,
-    originalPrice: 200,
-    dropTag: "//05 DROP",
-    colorCount: 2,
-    colors: ["#111111", "#f5f4ee"],
-    badge: "SALE -20%",
-    badgeClass: "bg-[#C84518] text-white",
-    wishlist: false,
-    image:
-      "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=700&q=80",
-  },
-  {
-    id: 6,
-    name: "ASYMMETRIC ZIP BOMBER",
-    spec: "Flight Satin Nylon /...",
-    price: 290,
-    originalPrice: null,
-    dropTag: "//06 DROP",
-    colorCount: 2,
-    colors: ["#111111", "#f5f4ee"],
-    badge: null,
-    badgeClass: "",
-    wishlist: false,
-    image:
-      "https://images.unsplash.com/photo-1548883354-7622d03aca27?auto=format&fit=crop&w=700&q=80",
-  },
-  {
-    id: 7,
-    name: "RELAXED PLEATED TROUSER",
-    spec: "Architectural Wool Flannel...",
-    price: 155,
-    originalPrice: null,
-    dropTag: "//07 DROP",
-    colorCount: 3,
-    colors: ["#111111", "#738276", "#f5f4ee"],
-    badge: null,
-    badgeClass: "",
-    wishlist: false,
-    image:
-      "https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?auto=format&fit=crop&w=700&q=80",
-  },
-  {
-    id: 8,
-    name: "STRUCTURED BALACLAVA KNIT",
-    spec: "100% Extrafine Ribbed...",
-    price: 95,
-    originalPrice: null,
-    dropTag: "//08 DROP",
-    colorCount: 2,
-    colors: ["#c84518", "#111111"],
-    badge: "EXCLUSIVE",
-    badgeClass: "bg-black text-white",
-    wishlist: false,
-    image:
-      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=700&q=80",
-  },
-]);
-
-const toggleWishlist = (id) => {
-  const item = products.value.find((p) => p.id === id);
-
-  if (item) item.wishlist = !item.wishlist;
-};
-
-// Club protocol subscription form
 const clubEmail = ref("");
 const handleClubSubmit = () => {
-  if (!clubEmail.value) {
-    return alert(`Protocol request confirmed for client coordinate: ${clubEmail.value}`);
-  }
-
-  clubEmail.value = "";
-};
+  if (!clubEmail.value) return
+  alert(`Protocol request confirmed for client coordinate: ${clubEmail.value}`)
+  clubEmail.value = ''
+}
 </script>
 

@@ -12,6 +12,10 @@ export interface ProductSummary {
   collection?: string
   rating?: number
   reviewCount?: number
+  spec?: string
+  colors?: string[]
+  dropTag?: string
+  badgeClass?: string
 }
 
 export interface ProductImage {
