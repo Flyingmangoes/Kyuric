@@ -19,19 +19,8 @@
           >ALL GARMENTS [SPEC_48]</span
         >
       </div>
-      <div class="flex items-center space-x-4 text-xs">
-        <span class="flex items-center space-x-1.5 text-[#C84518] font-bold">
-          <span
-            class="w-2 h-2 rounded-full bg-[#E05322] inline-block animate-pulse"
-          ></span>
-          <span>LIVE ATELIER INVENTORY</span>
-        </span>
-        <span class="text-neutral-400 hidden sm:inline">|</span>
-        <span class="text-neutral-500 hidden sm:inline uppercase"
-          >SYNC: REAL-TIME (UTC+9)</span
-        >
-      </div>
     </div>
+    
     <!-- Main Content Container -->
     <div class="max-w-[1720px] mx-auto px-4 md:px-10 py-8 lg:py-12 space-y-8">
       <!-- 02. Page Title Header & Metrics -->

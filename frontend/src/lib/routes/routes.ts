@@ -39,13 +39,13 @@ export const routes: RouteRecordRaw[] = [
   {
     path: '/signin',
     name: 'signin',
-    component: () => import('@/views/SignInView.vue'),
+    component: () => import('@/app/auth_service/SignInView.vue'),
     props: { title: 'Login' },
   },
   {
     path: '/register',
     name: 'register',
-    component: () => import('@/views/RegisterView.vue'),
+    component: () => import('@/app/auth_service/RegisterView.vue'),
     props: { title: 'Register' },
   },
   {

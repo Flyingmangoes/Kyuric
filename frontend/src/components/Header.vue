@@ -238,7 +238,7 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuth } from '@/app/auth_service/hook/useAuth'
+import { useAuth } from '@/app/auth_service/useAuth'
 
 const router = useRouter()
 const { user, isLoggedIn, initials, logout } = useAuth()

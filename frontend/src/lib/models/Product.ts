@@ -1,39 +1,69 @@
-export interface Product {
-    productID: string;
-    productName: string;
-    productDescription: string;
-    productPrice: number;
-    productImage: string;
-    productCategory: string;
-    productRating: number;
-    productTotalStock: number;
-    productExtra: ProductExtra[];
-    createdAt: string;
-    updatedAt: string;
+export interface ProductSummary {
+  id: number
+  slug: string
+  name: string
+  category: string
+  price: number
+  compareAtPrice?: number
+  image: string
+  badge?: string | null
+  tag?: string
+  styleNo?: string
+  collection?: string
+  rating?: number
+  reviewCount?: number
 }
 
-export interface ProductExtra {
-    color: string;
-    size: string;
-    stock: number;
+export interface ProductImage {
+  id: number
+  url: string
+  alt: string
+  label: string
 }
 
-export function mapProductResponse(raw: Record<string, unknown>): Product {
-    return {
-        productID: raw.productID as string || '',   
-        productName: raw.productName as string || '',
-        productDescription: raw.productDescription as string || '',
-        productPrice: raw.productPrice as number || 0,
-        productImage: raw.productImage as string || '',
-        productCategory: raw.productCategory as string || '',
-        productRating: raw.productRating as number || 0.0,
-        productTotalStock: raw.productTotalStock as number || 0,
-        productExtra: (raw.productExtra as Record<string, unknown>[] || []).map(item => ({
-            color: item.Color as string || '',
-            size: item.Size as string || '',    // fixed
-            stock: item.Stock as number || 0,
-        })),
-        createdAt: raw.createdAt as string || '',
-        updatedAt: raw.updatedAt as string || ''    
-    }
+export interface ProductColor {
+  name: string
+  hex: string
+}
+
+export interface ProductSize {
+  label: string
+  waist: string
+}
+
+export interface SizeChartRow {
+  label: string
+  display: string
+  waist: string
+  inseam: string
+  legOpening: string
+  thigh: string
+}
+
+export interface Review {
+  id: number
+  author: string
+  verifiedPurchaserBadge: string
+  date: string
+  headline: string
+  comment: string
+}
+
+// PDP-only data. Loaded by slug.
+export interface ProductDetail {
+  gallery: ProductImage[]
+  colors: ProductColor[]
+  sizes: ProductSize[]
+  tags: string[]
+  modelNote: string
+  modelSize: string
+  materialBadge: string
+  lowStock?: number
+  description: string[]
+  highlights: string[]
+  fabric: { textileCode: string; composition: string; coating: string }
+  sizeChart: SizeChartRow[]
+  care: string[]
+  related: string[] // slugs
+  reviews: Review[]
 }
