@@ -1,5 +1,5 @@
 <template>
-  <main
+  <main v-if="product && detail" 
     class="w-full bg-[#FAF9F5] text-neutral-900 font-sans selection:bg-[#E05322] selection:text-white"
   >
     <!-- 01. Top Breadcrumb & Archival Spec Tracker Bar -->
@@ -18,11 +18,11 @@
         <a
           href="/catalog?cat=trousers"
           class="hover:text-black transition-colors uppercase"
-          >TROUSERS & CARGO</a
+          >{{ product.category }}</a
         >
         <span>/</span>
         <span class="text-neutral-900 font-bold uppercase"
-          >TACTICAL PARACHUTE CARGO</span
+          >{{ product.name }}</span
         >
       </div>
       <div class="flex items-center space-x-4 text-xs font-mono">
@@ -30,11 +30,11 @@
           <span
             class="w-2 h-2 rounded-full bg-[#E05322] inline-block animate-pulse"
           ></span>
-          <span>CAPSULE 26-AW</span>
+          <span>{{ product.collection }}</span>
         </span>
         <span class="text-neutral-400 hidden sm:inline">|</span>
         <span class="text-neutral-500 uppercase hidden sm:inline"
-          >STYLE NO. #KY-7049</span
+          >STYLE NO. {{ product.styleNo }}</span>
         >
         <span class="text-neutral-400 hidden sm:inline">|</span>
         <span class="text-neutral-900 font-bold uppercase">IN STOCK</span>
@@ -108,8 +108,8 @@
             </div>
             <!-- Active Hero Image -->
             <img
-              :src="galleryImages[activeImageIndex].url"
-              :alt="galleryImages[activeImageIndex].alt"
+              :src="galleryImages[activeImageIndex]?.url"
+              :alt="galleryImages[activeImageIndex]?.alt"
               class="w-full h-full object-cover object-top transition-all duration-700"
             />
             <!-- Model Sizing Annotation & Fabric Spec Badges -->
@@ -211,32 +211,30 @@
             <h1
               class="text-4xl sm:text-5xl font-black uppercase tracking-tight text-black font-heading leading-[0.95]"
             >
-              TACTICAL<br />PARACHUTE<br />CARGO
+              <template v-for="(word, i) in titleWords" :key="i">
+                {{ word }}<br v-if="i< titleWords.length - 1"/>
+              </template>
             </h1>
           </div>
           <!-- Price & Installments -->
           <div class="space-y-2 border-b border-neutral-200 pb-5">
             <div class="flex items-baseline space-x-3">
-              <span
-                class="text-3xl font-black font-mono text-black leading-none"
-                >$185.00</span
-              >
-              <span class="text-sm font-mono text-neutral-400 line-through"
-                >$220.00</span
-              >
-              <span
-                class="bg-[#C84518] text-white text-[9px] font-mono font-bold uppercase px-2 py-0.5"
-              >
-                SAVE $35.00
-              </span>
+              <span class="text-3xl font-black font-mono text-black leading-none">${{ product.price.toFixed(2) }}</span>
+                <template v-if="product.compareAtPrice">
+                  <span class="text-sm font-mono text-neutral-400 line-through">${{ product.compareAtPrice.toFixed(2) }}</span>
+                  <span class="bg-[#C84518] text-white text-[9px] font-mono font-bold uppercase px-2 py-0.5">
+                    SAVE ${{ savings.toFixed(2) }}
+                  </span>
+                </template>
             </div>
             <div
               class="flex items-center space-x-2 text-[10px] font-mono text-neutral-500"
             >
               <span
                 >Or 4 interest-free payments of
-                <strong class="text-black font-bold">$46.25</strong> with</span
-              >
+                <strong class="text-black font-bold">${{ (product.price / 4).toFixed(2) }}</strong>
+                with
+              </span>
               <span
                 class="bg-neutral-100 border border-neutral-300 px-1.5 py-0.5 font-bold text-black uppercase text-[9px]"
                 >KLARNA</span
@@ -254,7 +252,7 @@
               class="flex justify-between items-center text-[10px] font-mono uppercase"
             >
               <span class="text-neutral-500">COLOR:</span>
-              <span class="text-black font-bold">{{ selectedColor.name }}</span>
+              <span class="text-black font-bold">{{ selectedColor?.name }}</span>
             </div>
             <div class="flex items-center space-x-3">
               <button
@@ -263,7 +261,7 @@
                 @click="selectedColor = color"
                 class="w-8 h-8 p-0.5 border transition-all relative"
                 :class="
-                  selectedColor.name === color.name
+                  selectedColor?.name === color.name
                     ? 'border-black ring-1 ring-black'
                     : 'border-neutral-300 hover:border-neutral-500'
                 "
@@ -286,7 +284,7 @@
                 @click="isSizeGuideOpen = true"
                 class="text-neutral-800 hover:text-black underline font-bold flex items-center space-x-1"
               >
-                <span>📏</span> <span>SIZE GUIDE & FIT</span>
+                <span>SIZE GUIDE & FIT</span>
               </button>
             </div>
             <div class="grid grid-cols-6 gap-1.5">
@@ -315,11 +313,9 @@
             <div
               class="flex items-center justify-between text-[10px] font-mono pt-1 text-neutral-500"
             >
-              <span
-                class="text-[#C84518] font-bold flex items-center space-x-1"
-              >
+              <span v-if="detail.lowStock" class="text-[#C84518] font-bold flex items-center space-x-1">
                 <span>●</span>
-                <span>ONLY 3 ITEMS LEFT IN SIZE {{ selectedSize }}</span>
+                <span>ONLY {{ detail.lowStock }} ITEMS LEFT IN SIZE {{ selectedSize }}</span>
               </span>
               <span class="uppercase">RUNS TRUE TO RELAXED SIZE</span>
             </div>
@@ -385,7 +381,7 @@
               </button>
               <button
                 @click="
-                  alert(
+                  notify(
                     'Stock confirmed at Tokyo Atelier (Shibuya) & NYC Archive (SoHo).',
                   )
                 "
@@ -487,21 +483,7 @@
               class="pt-5 grid grid-cols-1 lg:grid-cols-12 gap-8 text-xs font-sans text-neutral-700 leading-relaxed"
             >
               <div class="lg:col-span-8 space-y-3">
-                <p>
-                  The Tactical Parachute Cargo trousers represent KYURIC’s
-                  obsessive study of modern utilitarian ergonomics. Constructed
-                  with an architectural relaxed-tapered silhouette, they feature
-                  modular 3D accordion cargo pockets with internal divider
-                  sleeves, articulated four-dart knee pleats, and custom bungee
-                  toggles at the hems that allow instantaneous transformation
-                  between a wide parachute stack and a clean cinched cuff.
-                </p>
-                <p>
-                  Woven from dense 280GSM Japanese ripstop with a
-                  fluorocarbon-free water-repellent finish, this piece
-                  transitions seamlessly from harsh precipitation to breathable
-                  indoor comfort.
-                </p>
+                <p v-for="(para, i) in detail.description" :key="i">{{ para }}</p>
               </div>
               <div
                 class="lg:col-span-4 bg-[#F5F4EE] border border-neutral-300 p-4 space-y-2 font-mono text-[11px]"
@@ -510,10 +492,7 @@
                   KEY HIGHLIGHTS:
                 </div>
                 <ul class="space-y-1 text-neutral-800">
-                  <li>• MODULAR DUAL-DEPTH 3D CARGO POCKETS</li>
-                  <li>• KINETIC BUNGEE CINCH AT INNER ANKLE HEM</li>
-                  <li>• YKK EXCELLA GUNMETAL MATTE HARDWARE</li>
-                  <li>• INTEGRATED REINFORCED WEBBING BELT LOOPS</li>
+                  <li v-for="h in detail.highlights" :key="h">• {{ h }}</li>
                 </ul>
               </div>
             </div>
@@ -542,7 +521,7 @@
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div class="border border-neutral-200 p-3 bg-neutral-50">
                   <div class="text-neutral-400 text-[10px] uppercase">
-                    TEXTILE CODE
+                    {{  detail.fabric.textileCode }}
                   </div>
                   <div class="font-bold text-black mt-1">KY-RS-280G</div>
                 </div>
@@ -551,7 +530,7 @@
                     COMPOSITION
                   </div>
                   <div class="font-bold text-black mt-1">
-                    68% ORG. COTTON / 32% NYLON
+                    {{ detail.fabric.composition }}
                   </div>
                 </div>
                 <div class="border border-neutral-200 p-3 bg-neutral-50">
@@ -559,7 +538,7 @@
                     COATING
                   </div>
                   <div class="font-bold text-black mt-1">
-                    ECO DWR WATER-REPELLENT
+                    {{ detail.fabric.coating }}
                   </div>
                 </div>
               </div>
@@ -599,40 +578,14 @@
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-neutral-200">
-                  <tr>
-                    <td class="p-2.5 font-bold">XS (28)</td>
-                    <td class="p-2.5">28-29"</td>
-                    <td class="p-2.5">30.5"</td>
-                    <td class="p-2.5">6.5" - 9.0"</td>
-                    <td class="p-2.5">13.2"</td>
-                  </tr>
-                  <tr>
-                    <td class="p-2.5 font-bold">S (30)</td>
-                    <td class="p-2.5">30-31"</td>
-                    <td class="p-2.5">31.0"</td>
-                    <td class="p-2.5">6.8" - 9.2"</td>
-                    <td class="p-2.5">13.8"</td>
-                  </tr>
-                  <tr>
-                    <td class="p-2.5 font-bold">M (32)</td>
-                    <td class="p-2.5">32-33"</td>
-                    <td class="p-2.5">31.5"</td>
-                    <td class="p-2.5">7.0" - 9.5"</td>
-                    <td class="p-2.5">14.4"</td>
-                  </tr>
-                  <tr class="bg-neutral-100/70">
-                    <td class="p-2.5 font-bold text-[#C84518]">L (34) *</td>
-                    <td class="p-2.5 font-bold">34-35"</td>
-                    <td class="p-2.5 font-bold">32.0"</td>
-                    <td class="p-2.5 font-bold">7.2" - 9.8"</td>
-                    <td class="p-2.5 font-bold">15.0"</td>
-                  </tr>
-                  <tr>
-                    <td class="p-2.5 font-bold">XL (36)</td>
-                    <td class="p-2.5">36-37"</td>
-                    <td class="p-2.5">32.5"</td>
-                    <td class="p-2.5">7.5" - 10.0"</td>
-                    <td class="p-2.5">15.6"</td>
+                  <tr v-for="row in detail.sizeChart" :key="row.label" :class="row.label === detail.modelSize ? 'bg-neutral-100/70' : ''">
+                    <td class="p-2.5 font-bold" :class="row.label === detail.modelSize ? 'text-[#C84518]' : ''">
+                      {{ row.display }}{{ row.label === detail.modelSize ? ' *' : '' }}
+                    </td>
+                    <td class="p-2.5">{{ row.waist }}</td>
+                    <td class="p-2.5">{{ row.inseam }}</td>
+                    <td class="p-2.5">{{ row.legOpening }}</td>
+                    <td class="p-2.5">{{ row.thigh }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -662,14 +615,7 @@
               v-show="openAccordions.includes(4)"
               class="pt-5 text-xs font-mono space-y-2 text-neutral-600"
             >
-              <p>
-                • Machine wash cold at 30°C on delicate cycle. Line dry in shade
-                to preserve fluorocarbon-free coating.
-              </p>
-              <p>
-                • Zero deadstock: Manufactured in closed-loop micro-batches in
-                Okayama, Japan with certified recycled nylon cords.
-              </p>
+              <p v-for="(c, i) in detail.care" :key="i">• {{ c }}</p>
             </div>
           </div>
         </div>
@@ -696,55 +642,12 @@
           </span>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <article
+          <ProductCard
             v-for="look in lookRecommendations"
             :key="look.id"
-            class="bg-white border border-neutral-300/80 p-3 space-y-3 group hover:border-black transition-all shadow-sm flex flex-col justify-between"
-          >
-            <!-- Image & Quick Add -->
-            <div
-              class="aspect-[3/4] bg-neutral-100 overflow-hidden relative border border-neutral-200"
-            >
-              <span
-                v-if="look.badge"
-                class="absolute top-2 left-2 z-10 text-[9px] font-mono font-bold uppercase px-2 py-0.5 tracking-wider bg-black text-white"
-              >
-                {{ look.badge }}
-              </span>
-              <img
-                :src="look.image"
-                :alt="look.name"
-                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-              />
-              <button
-                @click="alert(`Added ${look.name} to quick bag`)"
-                class="absolute bottom-2 inset-x-2 bg-white/95 hover:bg-black hover:text-white text-black text-[10px] font-mono uppercase font-bold py-2 border border-neutral-300 transition-colors shadow-sm text-center"
-              >
-                + QUICK ADD
-              </button>
-            </div>
-            <!-- Meta & Info -->
-            <div class="space-y-1 pt-1">
-              <div class="text-[9px] font-mono text-neutral-400 uppercase">
-                {{ look.category }}
-              </div>
-              <h3
-                class="text-xs font-bold uppercase text-black group-hover:text-[#E05322] transition-colors line-clamp-1"
-              >
-                {{ look.name }}
-              </h3>
-              <div
-                class="flex justify-between items-baseline pt-1 border-t border-neutral-100"
-              >
-                <span class="text-sm font-black font-mono text-black"
-                  >${{ look.price.toFixed(2) }}</span
-                >
-                <span class="text-[9px] font-mono text-neutral-400 uppercase">{{
-                  look.tag
-                }}</span>
-              </div>
-            </div>
-          </article>
+            :product="look"
+            @quick-add="quickAdd"
+          />
         </div>
       </section>
       <!-- ================= 05. CUSTOMER REVIEWS & FIT DATA ================= -->
@@ -811,7 +714,7 @@
             </div>
             <!-- Write Review CTA -->
             <button
-              @click="alert('Review modal protocol opened.')"
+              @click="notify('Review modal protocol opened.')"
               class="bg-black hover:bg-[#E05322] text-white px-4 py-2.5 text-[10px] font-mono uppercase font-bold tracking-wider transition-colors shrink-0"
             >
               WRITE A REVIEW
@@ -865,149 +768,73 @@
       </section>
     </div>
   </main>
+  <main v-else 
+    class="w-full bg-[#FAF9F5] px-4 md:px-10 py-24 text-center font-mono text-xs uppercase space-y-3"
+  >
+    <p class="text-[#C84518] font-bold">// 404 — ARTICLE NOT IN ARCHIVE</p>
+    <RouterLink to="/catalog" class="underline">BACK TO CATALOG</RouterLink>
+</main>
 </template>
-<script setup>
-import { ref } from "vue";
 
-// ================= Reactive State =================
-const quantity = ref(1);
-const selectedSize = ref("L");
-const isWishlisted = ref(false);
-const isSizeGuideOpen = ref(false);
-const activeImageIndex = ref(0);
-const openAccordions = ref([1]);
+<script setup lang="ts">
+import { computed, ref, watch } from 'vue'
+import { useProducts } from '@/app/products_service/useProduct'
+import ProductCard from '@/components/product/ProductCard.vue'
+import type { ProductColor, ProductSummary } from '@/lib/models/Product'
 
-// First accordion open by default
-// Color Options
-const colorVariants = [
-  { name: "JAPANESE INK BLACK", hex: "#111111" },
-  { name: "BONE / RAW CHALK", hex: "#f0ede6" },
-  { name: "MILITARY DESERT OLIVE", hex: "#484d3e" },
-];
-const selectedColor = ref(colorVariants[0]);
-const sizeOptions = [
-  { label: "XS", waist: "28" },
-  { label: "S", waist: "30" },
-  { label: "M", waist: "32" },
-  { label: "L", waist: "34" },
-  { label: "XL", waist: "36" },
-  { label: "XXL", waist: "38" },
-];
-const galleryImages = [
-  {
-    id: 1,
-    url: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&w=1200&q=80",
-    alt: "Tactical Parachute Cargo Front Model Stacking",
-    label: "01 / FRONT",
-  },
-  {
-    id: 2,
-    url: "https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?auto=format&fit=crop&w=800&q=80",
-    alt: "Tactical Parachute Cargo Rear Articulation & Cinch",
-    label: "02 / REAR",
-  },
-  {
-    id: 3,
-    url: "https://images.unsplash.com/photo-1544441893-675973e31985?auto=format&fit=crop&w=800&q=80",
-    alt: "Japanese Ripstop Dense 280GSM Grid Weave Macro",
-    label: "03 / WEAVE",
-  },
-  {
-    id: 4,
-    url: "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=800&q=80",
-    alt: "Modular 3D Accordion Cargo Pocket & Gunmetal Hardware",
-    label: "04 / HARDWARE",
-  },
-];
+const props = defineProps<{ slug: string }>()
+const { getBySlug, getDetail, getMany } = useProducts()
 
-// Curated "Complete the Look" recommendations
-const lookRecommendations = [
-  {
-    id: 1,
-    name: "HERITAGE HEAVYWEIGHT HOODIE",
-    category: "KNITWEAR // 500GSM",
-    price: 145.0,
-    tag: "3 COLORS",
-    badge: "ESSENTIAL",
-    image:
-      "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=700&q=80",
-  },
-  {
-    id: 2,
-    name: "MODULAR UTILITY VEST",
-    category: "OUTERWEAR // CORDURA",
-    price: 160.0,
-    tag: "2 COLORS",
-    badge: "DROP 04",
-    image:
-      "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=700&q=80",
-  },
-  {
-    id: 3,
-    name: "STRUCTURED BALACLAVA KNIT",
-    category: "HEADWEAR // MERINO",
-    price: 95.0,
-    tag: "SINGLE RUN",
-    badge: null,
-    image:
-      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=700&q=80",
-  },
-  {
-    id: 4,
-    name: "ASYMMETRIC ZIP BOMBER",
-    category: "OUTERWEAR // PRIMALOFT",
-    price: 290.0,
-    tag: "JAPANESE TWILL",
-    badge: "LIMITED",
-    image:
-      "https://images.unsplash.com/photo-1548883354-7622d03aca27?auto=format&fit=crop&w=700&q=80",
-  },
-];
+const product = computed(() => getBySlug(props.slug))
+const detail = computed(() => getDetail(props.slug))
 
-// Customer verified reviews
-const reviewsList = [
-  {
-    id: 1,
-    author: "JULIAN K.",
-    verifiedPurchaserBadge: "VERIFIED BUYER // SIZE L",
-    date: "2 WEEKS AGO",
-    headline: "UNRIVALED FABRIC DENSITY",
-    comment:
-      "The Japanese ripstop is much sturdier than conventional fashion cargo pants. It has weight and holds its 3D architectural silhouette without feeling stiff. The bungee cinch cords make transitioning shoes seamless.",
-  },
-  {
-    id: 2,
-    author: "TRENT M.",
-    verifiedPurchaserBadge: "VERIFIED BUYER // SIZE M",
-    date: "1 MONTH AGO",
-    headline: "PERFECTION IN THE CUT",
-    comment:
-      "Worth every single dollar. I'm 6'0 and usually wear a 32, bought Medium. Sits cleanly on the waist, stacks gorgeously over high-top boots, and survived torrential rain in London completely dry.",
-  },
-  {
-    id: 3,
-    author: "ELENA V.",
-    verifiedPurchaserBadge: "VERIFIED BUYER // SIZE S",
-    date: "LAST MONTH",
-    headline: "BETTER THAN RUNWAY PIECES",
-    comment:
-      "The pocket engineering with internal dividers means your phone doesn't swing around when walking. Incredible hardware execution. KYURIC is easily dominating technical streetwear right now.",
-  },
-];
+const galleryImages = computed(() => detail.value?.gallery ?? [])
+const colorVariants = computed(() => detail.value?.colors ?? [])
+const sizeOptions = computed(() => detail.value?.sizes ?? [])
+const reviewsList = computed(() => detail.value?.reviews ?? [])
+const lookRecommendations = computed(() => getMany(detail.value?.related ?? []))
 
-// Accordion Toggle Logic
-const toggleAccordion = (index) => {
-  if (openAccordions.value.includes(index)) {
-    openAccordions.value = openAccordions.value.filter((i) => i !== index);
-  } else {
-    openAccordions.value.push(index);
-  }
-};
+const titleWords = computed(() => product.value?.name.split(' ') ?? [])
+const savings = computed(() => {
+  const p = product.value
+  return p?.compareAtPrice ? p.compareAtPrice - p.price : 0
+})
 
-// Commerce Handlers
+const quantity = ref(1)
+const selectedSize = ref('')
+const selectedColor = ref<ProductColor | null>(null)
+const isWishlisted = ref(false)
+const isSizeGuideOpen = ref(false)
+const activeImageIndex = ref(0)
+const openAccordions = ref<number[]>([1])
+
+watch(
+  () => props.slug,
+  () => {
+    quantity.value = 1
+    activeImageIndex.value = 0
+    openAccordions.value = [1]
+    isWishlisted.value = false
+    selectedColor.value = detail.value?.colors[0] ?? null
+    selectedSize.value = detail.value?.modelSize ?? detail.value?.sizes[0]?.label ?? ''
+  },
+  { immediate: true }
+)
+
+const toggleAccordion = (index: number) => {
+  openAccordions.value = openAccordions.value.includes(index)
+    ? openAccordions.value.filter((i) => i !== index)
+    : [...openAccordions.value, index]
+}
+
+const notify = (msg: string) => alert(msg)
+
 const handleAddToBag = () => {
-  alert(
-    `Added ${quantity.value}x Tactical Parachute Cargo (Size ${selectedSize.value}, Color: ${selectedColor.value.name}) to your bag. Total: $${(185 * quantity.value).toFixed(2)}`,
-  );
-};
+  if (!product.value) return
+  notify(
+    `Added ${quantity.value}x ${product.value.name} (Size ${selectedSize.value}, Color: ${selectedColor.value?.name}) to your bag. Total: $${(product.value.price * quantity.value).toFixed(2)}`
+  )
+}
+
+const quickAdd = (p: ProductSummary) => notify(`Added ${p.name} to quick bag`)
 </script>

@@ -13,15 +13,15 @@ export const routes: RouteRecordRaw[] = [
     props: { title: 'Search' },
   },
   {
-    path: '/products/:id',
-    name: 'product-detail',
-    component: () => import('@/components/placeholder_page.vue'),
-    props: { title: 'Product' },
+    path: '/product/:slug',
+    name: 'product',
+    component: () => import('@/app/products_service/ProductView.vue'),
+    props: true,
   },
   {
     path: '/catalog',
     name: 'product-catalog',
-    component: () => import('@/app/products_service/pages/CatalogPage.vue'),
+    component: () => import('@/app/products_service/CatalogView.vue'),
     props: { title: 'Catalog'}
   },
   {
