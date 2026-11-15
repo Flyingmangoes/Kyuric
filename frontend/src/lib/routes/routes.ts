@@ -53,6 +53,18 @@ export const routes: RouteRecordRaw[] = [
     redirect: '/signin'
   },
   {
+    path: '/account/setting',
+    name: 'account-setting',
+    component: () => import('@/app/user_service/ProfileView.vue'),
+    props: { title: 'Account Setting'}
+  },
+  {
+    path: '/account',
+    name: 'account',
+    component: () => import('@/app/user_service/ProfileView.vue'),
+    props: { title: 'Account' }
+  },
+  {
     path: '/employee',
     name: 'employee',
     component: () => import('@/components/placeholder_page.vue'),

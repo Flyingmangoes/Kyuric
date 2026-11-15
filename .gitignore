@@ -34,3 +34,5 @@ out/*
 
 nginx
 nginx/*
+
+.*.md
