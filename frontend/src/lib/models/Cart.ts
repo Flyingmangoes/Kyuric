@@ -9,6 +9,7 @@ export interface CartItem {
     cartID: string;
     productID: string;
     quantity: number;
+    price: number;
 }
 
 export function mapCartResponse(raw: Record<string, unknown>): Cart {
@@ -19,7 +20,8 @@ export function mapCartResponse(raw: Record<string, unknown>): Cart {
             cartItemID: item.cartItemID as string || '',
             cartID: item.cartID as string || '',
             productID: item.productID as string || '',
-            quantity: item.quantity as number || 0
+            quantity: item.quantity as number || 0,
+            price: item.price as number || 0
         }))
     }
 }

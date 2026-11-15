@@ -3,8 +3,8 @@ export interface OrderModel {
     buyerID: string;
     buyerEmail: string;
     totalPrice: number;
-    location: string;
-    status: string;
+    buyerAddress: string;
+    orderStatus: string;
     createdAt: string;
     orderItems: OrderItemModel[];
 }
@@ -17,14 +17,29 @@ export interface OrderItemModel {
     price: number;
 }
 
+export type OrderStage = 'placed' | 'processing' | 'in_transit' | 'delivered' | 'cancelled'
+
+export interface OrderRow {
+  orderID: string
+  ref: string
+  collection: string
+  title: string
+  specs: string
+  total: number
+  stage: OrderStage
+  statusLabel: string
+  secondaryAction: string
+  image: string
+}
+
 export function mapOrderResponse(raw: Record<string, unknown>): OrderModel {
     return {
         orderID: raw.orderID as string || '',
         buyerID: raw.buyerID as string || '',
         buyerEmail: raw.buyerEmail as string || '',
         totalPrice: raw.totalPrice as number || 0,
-        location: raw.location as string || '',
-        status: raw.status as string || '',
+        buyerAddress: raw.buyerAddress as string || '',
+        orderStatus: raw.orderStatus as string || '',
         createdAt: raw.createdAt as string || '',
         orderItems: (raw.orderItems as Record<string, unknown>[] || []).map(item => ({
             orderItemID: item.orderItemID as string || '',

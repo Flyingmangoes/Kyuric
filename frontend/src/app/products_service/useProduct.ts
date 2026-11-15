@@ -6,6 +6,6 @@ export function useProducts() {
   const getDetail = (slug: string) => productDetails[slug]
   const getMany = (slugs: string[]) =>
     slugs.map(getBySlug).filter((p): p is ProductSummary => p !== undefined)
-
-  return { all: products, getBySlug, getDetail, getMany }
+  const getById = (id: string) => products.find((p) => String(p.id) === id)
+  return { all: products, getById, getBySlug, getDetail, getMany }
 }
